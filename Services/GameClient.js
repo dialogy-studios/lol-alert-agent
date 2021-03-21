@@ -49,7 +49,7 @@ class GameClient {
 
     checkGameEvent(onEnd, onError) {
         const apiService = new APIRequest();
-        apiService.get(endpoints.eventData, onEnd, (e) => onError(e));
+        apiService.get(endpoints.eventData, onEnd, onError);
     }
 
     checkGameStartMoment() {
