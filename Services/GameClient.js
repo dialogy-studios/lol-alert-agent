@@ -2,7 +2,7 @@ const endpoints = require("../Utils/endpoints");
 const {BASE_URL} = require("../Utils/const");
 const https = require("https");
 const APIRequest = require("./APIRequest");
-const GameStart = require("../Observers/GameStart");
+const GameStart = require("../Observers/Observer");
 const {ONE_SECOND, ONE_MINUTE} = require("../Utils/const");
 
 class GameClient {

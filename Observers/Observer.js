@@ -1,5 +1,5 @@
 
-class GameStart {
+class Observer {
     constructor() {
         this.listener = null;
     }
@@ -16,5 +16,5 @@ class GameStart {
     }
 }
 
-module.exports = GameStart;
+module.exports = Observer;
 
