@@ -97,6 +97,8 @@ dist
 # FuseBox cache
 .fusebox/
 
+package-lock.json
+
 # DynamoDB Local files
 .dynamodb/
 
