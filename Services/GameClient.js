@@ -1,15 +1,10 @@
 const endpoints = require("../Utils/endpoints");
 const {BASE_URL} = require("../Utils/const");
 const https = require("https");
-const rootCert = require('ssl-root-cas').create();
 const APIRequest = require("./APIRequest");
 const GameStart = require("../Observers/GameStart");
 const {ONE_SECOND, ONE_MINUTE} = require("../Utils/const");
 
-rootCert
-    .addFile(process.cwd() + '/riotgames.pem');
-
-require('https').globalAgent.options.ca = rootCert;
 class GameClient {
     gameStartObserver = new GameStart();
     gameHandlers = {
