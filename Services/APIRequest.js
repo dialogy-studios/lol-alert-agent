@@ -8,12 +8,10 @@ rootCert
 require('https').globalAgent.options.ca = rootCert;
 class APIRequest {
     get(endpoint, onEnd, onError) {
-        https.get(BASE_URL + endpoint, (res) => {
+        https.get(BASE_URL + endpoint, (response) => {
             let data = '';
-            res.on('data', (chunk) => {
-                data += chunk;
-            });
-            res.on("end", () => onEnd(res, data));
+            response.on("data", (chunk) => data += chunk);
+            response.on("end", () => onEnd(response, data));
         })
             .on("error", (e) => onError(e));
     }

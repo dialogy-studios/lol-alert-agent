@@ -10,7 +10,6 @@ class Observer {
         this.listener = setInterval(callback, interval);
     }
 
-
     clearListener() {
         if (this.listener) clearInterval(this.listener);
     }
