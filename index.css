@@ -1,0 +1,124 @@
+.body-container {
+    margin:0;
+    top:0;
+    bottom:0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    max-width: 400px !important;
+    max-height: 600px !important;
+    height: 96.1vh;
+    overflow: hidden;
+}
+
+.root-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    -webkit-app-region: drag;
+}
+
+.texts-container {
+}
+
+.game-status-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+#game-status-text {
+    font-family: "Roboto Thin";
+    color: white;
+}
+.connected-summoner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.img-container {
+    align-self: center;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.button {
+    width: 20%;
+    padding: 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: green;
+    text-align: center;
+}
+
+.button-text {
+}
+
+
+.loader-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.video-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: -1;
+    margin-left: -200px;
+}
+
+.video-source {
+    height: 600px;
+    width: 394px;
+}
+
+.header-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.toolbar-options {
+    align-self: flex-end;
+}
+
+.toolbar-btn {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.toolbar-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7)
+
+}
+
+.minimize {
+    color: lightgoldenrodyellow;
+}
+
+.close {
+    color: lightgoldenrodyellow;
+
+}

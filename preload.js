@@ -1,10 +1,9 @@
-window.addEventListener('DOMContentLoaded', () => {
-    const replaceText = (selector, text) => {
-        const element = document.getElementById(selector)
-        if (element) element.innerText = text
-    }
+const { contextBridge, ipcRenderer } = require('electron');
 
-    for (const type of ['chrome', 'node', 'electron']) {
-        replaceText(`${type}-version`, process.versions[type])
-    }
+contextBridge.exposeInMainWorld("api", {
+    waitGameStart: async () => await ipcRenderer.invoke("game-start-checking"),
+    waitGameEnd: async () => await ipcRenderer.invoke("game-end-checking"),
+    reloadPage: () => ipcRenderer.send("reload-page"),
+    minimizeWindow: () => ipcRenderer.send("minimize-window"),
+    closeWindow: () => ipcRenderer.send("close-window")
 })

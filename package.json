@@ -4,8 +4,12 @@
   "author": "RKS App Studio",
   "description": "League of Legends Active Game Alert",
   "dependencies": {
+    "electron-log": "^4.3.2",
+    "electron-reload": "^1.5.0",
     "electron-squirrel-startup": "^1.0.0",
-    "ssl-root-cas": "^1.3.1"
+    "firebase": "^8.3.1",
+    "ssl-root-cas": "^1.3.1",
+    "update-electron-app": "^2.0.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",
@@ -19,33 +23,23 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "publish": "electron-forge publish"
   },
   "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "lol_alert"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
+    "forge": "./forge.config.js"
+  },
+  "win": {
+    "icon": "./Resources/lol_alert.ico"
+  },
+  "files": [
+    "./build/**/*",
+    "./dist/**/*",
+    "./node_modules/**/*",
+    "./public/**/*",
+    "*.js"
+  ],
+  "directories": {
+    "buildResources": "public"
   }
 }

@@ -1,67 +1,111 @@
-const endpoints = require("../Utils/endpoints");
+const {league} = require("../Utils/endpoints");
 const {BASE_URL} = require("../Utils/const");
-const https = require("https");
-const APIRequest = require("./APIRequest");
-const Observer = require("../Observers/Observer");
-const {ONE_SECOND, ONE_MINUTE} = require("../Utils/const");
+const {ONE_SECOND, FIVE_SECONDS} = require("../Utils/const");
+const rootCert = require('ssl-root-cas').create();
+const path = require("path");
+const riotGamesCert = path.resolve(__dirname, "..", "riotgames.pem");
+
+rootCert
+    .addFile(riotGamesCert);
+
+const https = require('https');
+https.globalAgent.options.ca = rootCert;
 
 class GameClient {
-    gameStartObserver = new Observer();
-    gameHandlers = {
-        start: {
-            https: {
-                onEnd: (res, events) => {
-                    const jsonEvents = JSON.parse(events);
-                    if (res.statusCode === 200) {
-                        const startEvent = jsonEvents["Events"].find((event) => event["EventID"] === 0);
-                        console.log("Game Started! Waiting for the end...");
-                        console.log("Game started at => ", startEvent["EventTime"]);
-                        this.gameStartObserver.clearListener();
-                        this.checkGameEndMoment();
-                    } else {
-                        console.log("Game not started yet...");
-                    }
-                },
-                onError: (error) => {
-                    console.log("Probably the player isn't in a match. Error => ", error.message);
-                }
-            }
-        },
-        end: {
-            https: {
-                onEnd: (res, data) => {
-                    if (res.statusCode === 404) {
-                        console.log("Game not started yet...");
-                    } else {
-                        console.log("Game not ended yet...");
-                    }
-                },
-                onError: (error) => {
-                    console.log("Probably game end! Error => ", error.message);
-                    this.gameStartObserver.clearListener();
-                    this.gameStartObserver.setListener(
-                        () => this.checkGameEvent(this.gameHandlers.start.https.onEnd, this.gameHandlers.start.https.onError),
-                        ONE_SECOND);
-                }
-            }
-        }
+    TAG = "[GameClient]";
+
+    async waitGameStart() {
+        let gameStarted = false;
+        do {
+            gameStarted = await this.generatePromiseGameStart();
+            await new Promise((resolve) => setTimeout(() => resolve(), ONE_SECOND));
+        } while (!gameStarted);
     }
 
-    checkGameEvent(onEnd, onError) {
-        const apiService = new APIRequest();
-        apiService.get(endpoints.eventData, onEnd, onError);
+    async waitGameEnd() {
+        let gameEnded = false;
+        do {
+            gameEnded = await this.generatePromiseGameEnd();
+            await new Promise((resolve) => setTimeout(() => resolve(), FIVE_SECONDS));
+        } while (!gameEnded);
     }
 
-    checkGameStartMoment() {
-        this.gameStartObserver.setListener(
-            () => this.checkGameEvent(this.gameHandlers.start.https.onEnd, this.gameHandlers.start.https.onError),
-            ONE_SECOND);
+    async getSummonerName() {
+        return await this.generatePromiseToActivePlayer();
     }
 
-    checkGameEndMoment() {
-        this.gameStartObserver.setListener(
-            () => this.checkGameEvent(this.gameHandlers.end.https.onEnd, this.gameHandlers.end.https.onError),
-            ONE_MINUTE);
+    generatePromiseGameStart() {
+        return new Promise((resolve) => {
+            https
+                .get(BASE_URL + league.eventData, (res) => {
+                    console.log(this.TAG, "Checking game start...");
+                    let data = '';
+                    res.on("data", (chunk) => data += chunk);
+                    res.on("end", () => {
+                        const dataJson = JSON.parse(data);
+                        if (res.statusCode === 200) {
+                            const events = dataJson["Events"];
+                            const gameHasBeenStarted = events.find((event) => event["EventName"] === "GameStart") !== undefined;
+                            if (gameHasBeenStarted) {
+                                console.log(this.TAG, "GAME STARTED!");
+                                resolve(true);
+                            } else {
+                                console.log(this.TAG, "GAME NOT STARTED YET!");
+                                resolve(false);
+                            }
+                        } else {
+                            console.log(this.TAG, "GAME NOT STARTED YET!");
+                            resolve(false);
+                        }
+                    })
+                })
+                .on("error", (error) => {
+                    console.log(this.TAG, "ERROR! GAME NOT STARTED YET!");
+                    resolve(false);
+                })
+        });
+    }
+
+    generatePromiseGameEnd() {
+        return new Promise((resolve) => {
+            https
+                .get(BASE_URL + league.eventData, (res) => {
+                    let data = '';
+                    res.on("data", (chunk) => data += chunk);
+                    res.on("end", () => {
+                        if (res.statusCode === 200) {
+                            console.log(this.TAG, "GAME NOT ENDED YET!");
+                            resolve(false);
+                        }
+                    });
+                })
+                .on("error", (error) => {
+                    console.log(this.TAG, "GAME ENDED!");
+                    resolve(true);
+                });
+        });
+    }
+
+    generatePromiseToActivePlayer() {
+        return new Promise((resolve, reject) => {
+            https
+                .get(BASE_URL + league.activePlayer, (res) => {
+                    let data = '';
+                    res.on("data", (chunk) => data += chunk);
+                    res.on("end", () => {
+                        const jsonData = JSON.parse(data);
+                        const summonerName = jsonData["summonerName"];
+                        if (summonerName) {
+                            resolve(summonerName);
+                        } else {
+                            reject("Invalid summoner nick!");
+                        }
+                    })
+                })
+                .on("error", (error) => {
+                    resolve(null);
+                })
+        })
     }
 }
 

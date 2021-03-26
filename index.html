@@ -3,14 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Hello World!</title>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
+    <link href="./index.css" rel="stylesheet"/>
+    <script src="Screens/Main/Events.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">
 </head>
-<body style="background: white;">
-<h1>Hello World!</h1>
-<p>
-    We are using Node.js <span id="node-version"></span>,
-    Chromium <span id="chrome-version"></span>,
-    and Electron <span id="electron-version"></span>.
-</p>
+<body class="body-container">
+    <header class="header-container">
+        <div class="toolbar-options">
+            <i id="minimize-button" class="far fa-window-minimize toolbar-btn minimize"></i>
+            <i id="close-button" class="fas fa-times toolbar-btn close"></i>
+        </div>
+    </header>
+    <div class="root-container">
+        <video class="video-container" autoplay muted loop>
+            <source class="video-source" src="Resources/background-video.mp4" type="video/mp4">
+        </video>
+        <div class="img-container">
+            <img src="Resources/logo.png"/>
+        </div>
+        <div id="root-container" class="texts-container"/>
+    </div>
 </body>
 </html>
