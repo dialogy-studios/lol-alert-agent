@@ -1,8 +1,9 @@
 {
   "name": "lol-alert",
-  "version": "0.1.0",
-  "author": "RKS App Studio",
+  "version": "1.0.5-alpha",
+  "author": "Dialogy App Studios",
   "description": "League of Legends Active Game Alert",
+  "repository": "dialogy-studios/lol-alert-agent",
   "dependencies": {
     "auto-launch": "^5.0.5",
     "btoa": "^1.2.1",

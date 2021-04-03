@@ -1,6 +1,6 @@
 const GameClient = require("./Services/GameClient");
 const Notification = require("./Services/Notification")
-const {app, BrowserWindow, ipcMain} = require("electron");
+const {app, BrowserWindow, ipcMain, Tray, Menu} = require("electron");
 const path = require("path");
 const configs = require("./Utils/configs");
 const Updater = require("./updater");
@@ -21,7 +21,7 @@ autoLauncher.isEnabled().then(function(isEnabled) {
 
 
 const LCUConnector = require('lcu-connector');
-let lcuConnector;
+let lcuConnector, tray;
 
 if (configs.process.env === "development") {
     require('electron-reload')(__dirname, {
@@ -113,10 +113,22 @@ function createWindow () {
     });
     ipcMain.on("minimize-window", () => win.minimize());
     ipcMain.on("close-window", () => win.close());
-    win.loadFile('./index.html');
+
+    tray = new Tray(path.resolve(__dirname, "Resources", "lol-alert-icon.png"));
+    const contextMenu = Menu.buildFromTemplate([
+        {label: "Show", click: () => win.restore()},
+        {label: "Hide", click: () => win.minimize()}
+        ]);
+    tray.setToolTip("LoL Alert");
+    tray.on("click", () => win.restore())
+    tray.setContextMenu(contextMenu);
+    win.on("restore", () => win.setSkipTaskbar(false));
+    win.on("minimize", () => win.setSkipTaskbar(true));
+    win.on("ready-to-show", () => win.minimize());
+    win
+        .loadFile('./index.html')
     lcuConnector = initializeLCU();
-    lcuConnector
-        .start();
+    lcuConnector.start();
 }
 
 app.whenReady().then(() => {

@@ -1,5 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+/*deprecated*/
 contextBridge.exposeInMainWorld("api", {
     waitGameStart: async () => await ipcRenderer.invoke("game-start-checking"),
     waitGameEnd: async () => await ipcRenderer.invoke("game-end-checking"),
