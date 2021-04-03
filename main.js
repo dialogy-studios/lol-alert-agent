@@ -5,10 +5,12 @@ const path = require("path");
 const firebase = require("firebase/app");
 const configs = require("./Utils/configs");
 const Updater = require("./updater");
-const firebaseApp = firebase.initializeApp(configs.process.env === "production" ?
-    configs.firebase.prod :
-    configs.firebase.dev);
+const endpoints = require("./Utils/endpoints");
+const LeagueClient = require("./Services/LeagueClient");
 require("firebase/auth");
+
+const LCUConnector = require('lcu-connector');
+let lcuConnector;
 
 if (configs.process.env === "development") {
     require('electron-reload')(__dirname, {
@@ -17,25 +19,69 @@ if (configs.process.env === "development") {
     });
 }
 
-
-const channels = {
-    gameStartChecking: async (event, ...args) => {
-        const gameClient = new GameClient();
+function initializeLCU() {
+    let leagueClient, gameClient;
+    const handleLCUEvents = async ({username, password, address, port}) => {
         const notification = new Notification();
-        await gameClient.waitGameStart();
-        console.log("Game started!");
-        const summonerName = await gameClient.getSummonerName();
-        console.log("Summoner name => ", summonerName);
-        await notification.sendNotification(summonerName);
-        console.log("Notification sent!");
-        return summonerName;
-    },
-    gameEndChecking: async (event, ...args) => {
-        const gameClient = new GameClient();
-        await gameClient.waitGameEnd();
+        let currentSummoner = null, summonerName;
+        leagueClient = new LeagueClient()
+            .password(password).user(username).server(address).port(port)
+            .build()
+            .on("lobby", () => console.log("Summoner is in the lobby!")) /*not emitted*/
+            .on("searching", () => console.log("Summoner is searching!!!")) /*not emitted*/
+            .on("foundMatch", () => {
+                notification.sendNotification(summonerName, "matchFound");
+                console.log("Found match!");
+            })
+            .on("enterChampSelect", () => console.log("Entered champ select!")) /*not emitted*/
+            .on("leaveChampSelect", () => console.log("Summoner leave from champ select!!")) /*not emitted*/
+            .on("gameStarting", async () => {
+                console.log("Game starting...");
+                leagueClient.stop();
+                gameClient.start();
+            })
+        gameClient = GameClient
+            .build()
+            .on("gameLoading", () => console.log("Loading game!"))
+            .on("gameStarted", () => {
+                console.log("Game started!");
+                notification.sendNotification(summonerName, "gameStarted");
+                gameClient.stop();
+                leagueClient.start();
+            })
+            .on("gameEnded", async () => console.log("Game ended!"))
+            .on("notInGame", () => {
+                console.log("Summoner is not in game!!");
+                gameClient.stop();
+                leagueClient.start();
+            });
+        leagueClient.start();
+        const subscriptionToGetCurrentSummoner = setInterval(async () => {
+            try {
+                currentSummoner = await leagueClient.getCurrentSummoner();
+                summonerName = currentSummoner.displayName;
+                if (summonerName)clearInterval(subscriptionToGetCurrentSummoner);
+            } catch (e) {
+                console.log(e.message);
+            }
+        }, 1000)
     }
-}
 
+    const clearLCUEvents = async () => {
+        if (leagueClient) {
+            leagueClient.stop();
+        }
+
+        if (gameClient) {
+            gameClient.stop();
+        }
+    }
+    const lcuConnector = new LCUConnector();
+    lcuConnector
+        .on("connect", handleLCUEvents)
+        .on("disconnect", clearLCUEvents);
+    return lcuConnector;
+}
 
 function createWindow () {
     const win = new BrowserWindow({
@@ -43,32 +89,32 @@ function createWindow () {
         height: 600,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
-            nodeIntegration: false, contextIsolation: true, enableRemoteModule: false
+            nodeIntegration: false, contextIsolation: true, enableRemoteModule: false,
         },
         resizable: false,
         frame: false,
         icon: __dirname + "/Resources/lol_alert.png"
     });
 
-    ipcMain.handle("game-start-checking", channels.gameStartChecking);
-    ipcMain.handle("game-end-checking", channels.gameEndChecking);
+    configs.process.env == "development" && win.webContents.openDevTools();
     ipcMain.on("reload-page", () => {
         win.reload();
-    })
+    });
     ipcMain.on("minimize-window", () => win.minimize());
     ipcMain.on("close-window", () => win.close());
-    win.loadFile('./index.html')
+    win.loadFile('./index.html');
+    lcuConnector = initializeLCU();
+    lcuConnector
+        .start();
 }
 
-console.log("Resources path => ", process.resourcesPath);
 app.whenReady().then(() => {
     const updater = new Updater();
-    console.log("process env => ", process.env.FCM_KEY);
     if (updater.setupAll()) {
         createWindow();
         app.on('activate', () => {
             if (BrowserWindow.getAllWindows().length === 0) {
-                createWindow()
+                createWindow();
             }
         });
     } else {

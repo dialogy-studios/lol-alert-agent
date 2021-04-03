@@ -1,10 +1,26 @@
 const endpoints = {
-    league: {
+    leagueClient: {
+        matchMaking: {
+            session: "/lol-champ-select/v1/session",
+            searchState: "/lol-lobby/v2/lobby/matchmaking/search-state",
+        },
+        lobby: {
+
+        },
+        summoner: {
+            currentSummoner: "/lol-summoner/v1/current-summoner"
+        }
+    },
+    gameClient: {
         eventData: "/liveclientdata/eventdata",
-        activePlayer: "/liveclientdata/activeplayer"
+        activePlayer: "/liveclientdata/activeplayer",
+
     },
     functions: {
-        sendNotification: (summonerName) => `/sendNotification/${summonerName}`
+        sendNotification: {
+            gameStarted:  (summonerName) => `/sendNotification/gameStarted/${summonerName}`,
+            matchFound:  (summonerName) => `/sendNotification/matchFound/${summonerName}`
+        }
     }
 
 }

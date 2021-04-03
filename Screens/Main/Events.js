@@ -42,6 +42,7 @@ const requestGameChecking = async () => {
         console.log("Error => ", e.message);
     }
 }
+
 window.addEventListener("load",   () => {
     const {api} = window;
     const root = document.getElementById("root-container");
@@ -54,5 +55,6 @@ window.addEventListener("load",   () => {
     const closeBtn = document.getElementById("close-button");
     minimizeBtn.addEventListener("click", () => api.minimizeWindow());
     closeBtn.addEventListener("click", () => api.closeWindow());
-    requestGameChecking();
+    api.subscribeToMainChannelEvents();
+    // requestGameChecking();
 })
