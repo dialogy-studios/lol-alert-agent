@@ -2,12 +2,23 @@ const GameClient = require("./Services/GameClient");
 const Notification = require("./Services/Notification")
 const {app, BrowserWindow, ipcMain} = require("electron");
 const path = require("path");
-const firebase = require("firebase/app");
 const configs = require("./Utils/configs");
 const Updater = require("./updater");
-const endpoints = require("./Utils/endpoints");
+const AutoLaunch = require('auto-launch');
 const LeagueClient = require("./Services/LeagueClient");
 require("firebase/auth");
+
+const autoLauncher = new AutoLaunch({
+    name: "LoL Alert"
+});
+// Checking if autoLaunch is enabled, if not then enabling it.
+autoLauncher.isEnabled().then(function(isEnabled) {
+    if (isEnabled) return;
+    autoLauncher.enable();
+}).catch(function (err) {
+    throw err;
+});
+
 
 const LCUConnector = require('lcu-connector');
 let lcuConnector;
