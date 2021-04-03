@@ -6,10 +6,6 @@ module.exports = {
         name: "LoL Alert",
         osxSign: {
             identity: "Developed by Dialogy Studios"
-        },
-        win32metadata: {
-            CompanyName: "Dialogy Studios",
-            FileDescription: "LoL Alert Agent is a desktop application that communicate with League of Legends microservices"
         }
     },
     makers: [

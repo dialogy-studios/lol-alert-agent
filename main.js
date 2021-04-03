@@ -107,7 +107,6 @@ function createWindow () {
         icon: __dirname + "/Resources/lol_alert.png"
     });
 
-    configs.process.env == "development" && win.webContents.openDevTools();
     ipcMain.on("reload-page", () => {
         win.reload();
     });

@@ -1,4 +1,11 @@
-const http = require("http");
+const rootCert = require('ssl-root-cas').create();
+const path = require("path");
+const riotGamesCert = path.resolve(__dirname, "..", "riotgames.pem");
+rootCert
+    .addFile(riotGamesCert);
+
+const https = require('https');
+https.globalAgent.options.ca = rootCert;
 const {FUNCTIONS_BASE_URL} = require("../Utils/const");
 const {functions} = require("../Utils/endpoints");
 class Notification {
@@ -9,7 +16,7 @@ class Notification {
     generateNotificationPromise(summonerName, notificationType) {
         return new Promise((resolve, reject) => {
             const url = FUNCTIONS_BASE_URL + functions.sendNotification[notificationType](summonerName);
-            http
+            https
                 .get(url, (res) => {
                     res.on("end", () => {
                         resolve();
